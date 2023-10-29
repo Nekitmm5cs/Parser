@@ -8,22 +8,34 @@ class BMW:
         self.car_data = []
         self.get_data()
 
+    def parse_html(self, html):
+        soup = BeautifulSoup(html, 'html.parser')
+        car_name_elements = soup.find_all("h3", class_="listing__title")
+        car_names = []
+        for car_name_element in car_name_elements:
+            car_names.append(car_name_element.text)
+        return car_names
+
     def get_data(self):
         response = requests.get(self.url)
         if response.status_code == 200:
             html = response.text
-            self.head_parse_html(html)
+            self.main_parse_html(html)
         else:
             raise ValueError(f"Invalid response with status: {response.status_code}")
 
-    def head_parse_html(self, html):
+    def main_parse_html(self, html):
         soup = BeautifulSoup(html, 'html.parser')
-        self.info_elements = soup.find_all("h3", class_="listing__title")
+        car_name_elements = soup.find_all("h3", class_="listing__title")
+        car_names = []
+        for car_name_element in car_name_elements:
+            car_names.append(car_name_element.text)
+            print(car_names)
         car_elements = soup.find_all("div", class_='listing-item')
 
         for car_element in car_elements:
             car_info = {}
-            photo_element = car_element.find("img", class_="listing-item__photo")
+            photo_element = car_element.find("img", class_="ls-is-cached lazyloaded")
             link_element = car_element.find("a", class_="listing-item__link")
             name_element = car_element.find("span", class_="link-text")
             params_element = car_element.find("div", class_="listing-item__params")
@@ -55,3 +67,4 @@ if __name__ == "__main__":
     URL = "https://cars.av.by/filter?brands[0][brand]=8&brands[0][model]=81&brands[0][generation]=11815&sort=2"
     bmw = BMW(URL)
     bmw.print_car_info()
+
